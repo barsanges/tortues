@@ -1,0 +1,19 @@
+name:                tortues
+version:             0.1.0
+author:              barsanges
+maintainer:          https://github.com/barsanges
+copyright:           2025 barsanges
+
+extra-source-files:
+- README.md
+
+synopsis:            A solver for the game "Le lièvre et les tortues"
+description:         Please see the README
+
+dependencies:
+- base
+- containers
+- vector
+
+library:
+  source-dirs: src

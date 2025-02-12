@@ -1,0 +1,29 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.37.0.
+--
+-- see: https://github.com/sol/hpack
+
+name:           tortues
+version:        0.1.0
+synopsis:       A solver for the game "Le lièvre et les tortues"
+description:    Please see the README
+author:         barsanges
+maintainer:     https://github.com/barsanges
+copyright:      2025 barsanges
+build-type:     Simple
+extra-source-files:
+    README.md
+
+library
+  exposed-modules:
+      Puzzle
+  other-modules:
+      Paths_tortues
+  hs-source-dirs:
+      src
+  build-depends:
+      base
+    , containers
+    , vector
+  default-language: Haskell2010

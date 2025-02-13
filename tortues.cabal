@@ -27,3 +27,19 @@ library
     , containers
     , vector
   default-language: Haskell2010
+
+test-suite tortues-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      PuzzleSpec
+      Paths_tortues
+  hs-source-dirs:
+      test
+  build-depends:
+      base
+    , containers
+    , hspec
+    , tortues
+    , vector
+  default-language: Haskell2010

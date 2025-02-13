@@ -58,7 +58,7 @@ orderFence i j = (min i j, max i j)
 checkFence :: (Int, Int) -> Either String (Int, Int)
 checkFence (i, j) = if res `S.member` admissibleFences
                     then Right res
-                    else Left "a fence should be set between two adjacent cells"
+                    else Left "a fence should be set between two adjacent cells inside the grid"
   where
     res = orderFence i j
 

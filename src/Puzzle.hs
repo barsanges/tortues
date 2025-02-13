@@ -93,7 +93,7 @@ mkPuzzle fs fences = do
   if (S.size fences'') /= (length fences)
     then Left "all fences should be different"
     else if (S.size fences'') > 4
-         then Left "There should be at most 4 fences"
+         then Left "there should be at most 4 fences"
          else let admissibleSteps = V.imap (filterSteps fences'') steps
                   admissibleJumps = V.imap (filterJumps fences'') jumps
               in Right Puzzle { figures_ = fs',

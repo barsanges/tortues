@@ -7,13 +7,13 @@ Un puzzle du jeu "Le lièvre et les tortues".
 
 module Puzzle
   ( Figure(..)
+  , Fence(..)
   , Puzzle
   , mkPuzzle
   , check
   , move
   ) where
 
-import Control.Monad ( forM )
 import qualified Data.IntMap as I
 import Data.List ( nub )
 import Data.Maybe ( mapMaybe )
@@ -22,6 +22,14 @@ import qualified Data.Vector as V
 
 -- | Un des animaux.
 data Figure = Green | Hare | Purple | Red | Blue | Yellow
+  deriving (Eq, Ord, Show)
+
+-- | Une barrière sur le plateau. Les deux chiffres du constructeur
+-- indiquent les deux cases que la barrière sépare : ainsi, `F01`
+-- représente une barrière à la frontière entre la case 0 (case de la
+-- tortue verte) et la case 1 (case du lièvre).
+data Fence = F01 | F12 | F34 | F45 | F67 | F78
+           | F03 | F14 | F25 | F36 | F47 | F58
   deriving (Eq, Ord, Show)
 
 -- | Un puzzle.
@@ -45,22 +53,24 @@ jumps = V.fromListN 9 [[(1, 2), (3, 6)], [(4, 7)], [(1, 0), (5, 8)],
                                [(4, 5)],       [],         [(4, 3)],
                        [(3, 0), (7, 8)], [(4, 1)], [(7, 6), (5, 2)]]
 
--- | Positions autorisées pour les barrières.
-admissibleFences :: S.Set (Int, Int)
-admissibleFences = S.fromList [(0, 1), (1, 2), (3, 4), (4, 5), (6, 7), (7, 8),
-                               (0, 3), (1, 4), (2, 5), (3, 6), (4, 7), (5, 8)]
+-- | Transforme un objet `Fence` en un tuple d'entiers.
+fenceToTuple :: Fence -> (Int, Int)
+fenceToTuple F01 = (0, 1)
+fenceToTuple F12 = (1, 2)
+fenceToTuple F34 = (3, 4)
+fenceToTuple F45 = (4, 5)
+fenceToTuple F67 = (6, 7)
+fenceToTuple F78 = (7, 8)
+fenceToTuple F03 = (0, 3)
+fenceToTuple F14 = (1, 4)
+fenceToTuple F25 = (2, 5)
+fenceToTuple F36 = (3, 6)
+fenceToTuple F47 = (4, 7)
+fenceToTuple F58 = (5, 8)
 
 -- | Trie les coordonnées d'une barrière.
 orderFence :: Int -> Int -> (Int, Int)
 orderFence i j = (min i j, max i j)
-
--- | Vérifie qu'une barrière est admissible.
-checkFence :: (Int, Int) -> Either String (Int, Int)
-checkFence (i, j) = if res `S.member` admissibleFences
-                    then Right res
-                    else Left "a fence should be set between two adjacent cells inside the grid"
-  where
-    res = orderFence i j
 
 -- | Vérifie que le plateau (hors barrière) est admissible.
 checkFigures :: I.IntMap Figure -> Either String (I.IntMap Figure)
@@ -85,20 +95,17 @@ filterJumps xs i jks = fmap snd
                        jks
 
 -- | Construit un puzzle.
-mkPuzzle :: I.IntMap Figure -> [(Int, Int)] -> Either String Puzzle
+mkPuzzle :: I.IntMap Figure -> S.Set Fence -> Either String Puzzle
 mkPuzzle fs fences = do
   fs' <- checkFigures fs
-  fences' <- forM fences checkFence
-  let fences'' = S.fromList fences'
-  if (S.size fences'') /= (length fences)
-    then Left "all fences should be different"
-    else if (S.size fences'') > 4
-         then Left "there should be at most 4 fences"
-         else let admissibleSteps = V.imap (filterSteps fences'') steps
-                  admissibleJumps = V.imap (filterJumps fences'') jumps
-              in Right Puzzle { figures_ = fs',
-                                tortoiseMoves_ = admissibleSteps,
-                                hareMoves_ = V.zipWith (++) admissibleSteps admissibleJumps }
+  let fences' = S.map fenceToTuple fences
+  if (S.size fences) > 4
+    then Left "there should be at most 4 fences"
+    else let admissibleSteps = V.imap (filterSteps fences') steps
+             admissibleJumps = V.imap (filterJumps fences') jumps
+         in Right Puzzle { figures_ = fs',
+                           tortoiseMoves_ = admissibleSteps,
+                           hareMoves_ = V.zipWith (++) admissibleSteps admissibleJumps }
 
 -- | Vérifie si le puzzle est résolu.
 check :: Puzzle -> Bool

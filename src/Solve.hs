@@ -21,6 +21,9 @@ test x = isNothing (test' [x] S.empty)
 test' :: [Puzzle] -> S.Set Puzzle -> Maybe (S.Set Puzzle)
 test' [] s = Just s
 test' (x:xs) s
-  | x `S.member` s = Just s
   | check x = Nothing
-  | otherwise = (test' (move x) (S.insert x s)) >>= (test' xs)
+  | otherwise = ms' >>= (test' xs)
+  where
+    ms' = if x `S.member` s
+          then Just s
+          else test' (move x) (S.insert x s)

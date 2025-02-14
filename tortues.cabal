@@ -18,6 +18,7 @@ extra-source-files:
 library
   exposed-modules:
       Puzzle
+      Solve
   other-modules:
       Paths_tortues
   hs-source-dirs:

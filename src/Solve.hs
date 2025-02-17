@@ -35,21 +35,22 @@ test' (x:xs) s
 -- existe plusieurs solutions optimales, aucune garantie n'est faite
 -- sur la solution exacte renvoyée par la fonction.
 solve :: Puzzle -> Maybe (Seq Puzzle)
-solve x = solve' Empty x Nothing
+solve x = fmap (fmap toPuzzle) $ solve' Empty x Nothing
 
 -- | Utilitaire de `solve`.
-solve' :: Seq Puzzle
+solve' :: Seq Hash
        -> Puzzle
-       -> Maybe (Seq Puzzle)
-       -> Maybe (Seq Puzzle)
+       -> Maybe (Seq Hash)
+       -> Maybe (Seq Hash)
 solve' prev x mbest
   | maybeLowerBy length mbest (Just prev) = mbest
-  | x `elem` prev = mbest
-  | check x = Just (prev :|> x)
+  | h `elem` prev = mbest
+  | check x = Just (prev :|> h)
   | maybeLowerBy length mbest msol = mbest
   | otherwise =  msol
   where
-    msol = foldr (solve' (prev :|> x)) mbest (move x)
+    h = fromPuzzle x
+    msol = foldr (solve' (prev :|> h)) mbest (move x)
 
 -- | Compare deux éléments incertains selon une métrique donnée.
 maybeLowerBy :: Ord b => (a -> b) -> Maybe a -> Maybe a -> Bool

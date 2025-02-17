@@ -38,6 +38,16 @@ spec = do
     it "should give a result otherwise, even if the grid is empty" $
       (mkPuzzle I.empty (S.fromList [F01, F36])) `shouldSatisfy` isRight
 
+  describe "Hash" $ do
+    it "toPuzzle . fromPuzzle == id (1)" $
+      (fmap (toPuzzle . fromPuzzle) $ mkPuzzle (I.fromList [(0, Hare)]) (S.fromList [F47, F03])) `shouldBe` (mkPuzzle (I.fromList [(0, Hare)]) (S.fromList [F47, F03]))
+
+    it "toPuzzle . fromPuzzle == id (2)" $
+      (fmap (toPuzzle . fromPuzzle) $ mkPuzzle I.empty (S.fromList [F01, F36])) `shouldBe` (mkPuzzle I.empty (S.fromList [F01, F36]))
+
+    it "should give different identifiers to different puzzles" $
+      (fmap fromPuzzle $ mkPuzzle (I.fromList [(0, Hare)]) (S.fromList [F01, F03])) `shouldNotBe` (fmap fromPuzzle $ mkPuzzle (I.fromList [(0, Green)]) (S.fromList [F01, F03]))
+
   describe "check" $ do
     it "should return True if the puzzle is solved (1)" $
       (fmap check $ mkPuzzle I.empty (S.fromList [])) `shouldBe` (Right True)

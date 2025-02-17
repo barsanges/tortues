@@ -10,6 +10,9 @@ module Puzzle
   , Fence(..)
   , Puzzle
   , mkPuzzle
+  , Hash
+  , fromPuzzle
+  , toPuzzle
   , check
   , move
   ) where
@@ -34,9 +37,14 @@ data Fence = F01 | F12 | F34 | F45 | F67 | F78
 
 -- | Un puzzle.
 data Puzzle = Puzzle { figures_ :: I.IntMap Figure
+                     , fences_ :: S.Set Fence
                      , tortoiseMoves_ :: V.Vector [Int]
                      , hareMoves_ :: V.Vector [Int]
                      }
+  deriving (Eq, Ord, Show)
+
+-- | L'identifiant unique d'un puzzle.
+data Hash = H Int
   deriving (Eq, Ord, Show)
 
 -- | Mouvements autorisés pour les tortues pour chaque case du plateau, en
@@ -94,18 +102,106 @@ filterJumps xs i jks = fmap snd
                                              && ((orderFence j k) `S.notMember` xs))
                        jks
 
+-- | Construit un puzzle sans vérifier que les arguments sont valides.
+unsafeMkPuzzle :: I.IntMap Figure -> S.Set Fence -> Puzzle
+unsafeMkPuzzle fs fences = Puzzle { figures_ = fs,
+                                    fences_ = fences,
+                                    tortoiseMoves_ = admissibleSteps,
+                                    hareMoves_ = V.zipWith (++) admissibleSteps admissibleJumps }
+  where
+    fences' = S.map fenceToTuple fences
+    admissibleSteps = V.imap (filterSteps fences') steps
+    admissibleJumps = V.imap (filterJumps fences') jumps
+
 -- | Construit un puzzle.
 mkPuzzle :: I.IntMap Figure -> S.Set Fence -> Either String Puzzle
 mkPuzzle fs fences = do
   fs' <- checkFigures fs
-  let fences' = S.map fenceToTuple fences
   if (S.size fences) > 4
     then Left "there should be at most 4 fences"
-    else let admissibleSteps = V.imap (filterSteps fences') steps
-             admissibleJumps = V.imap (filterJumps fences') jumps
-         in Right Puzzle { figures_ = fs',
-                           tortoiseMoves_ = admissibleSteps,
-                           hareMoves_ = V.zipWith (++) admissibleSteps admissibleJumps }
+    else Right $ unsafeMkPuzzle fs' fences
+
+-- | Transforme un hash en puzzle.
+toPuzzle :: Hash -> Puzzle
+toPuzzle (H n) = unsafeMkPuzzle figures fences
+  where
+    fencesFromInt :: Int -> (Int, S.Set Fence) -> (Int, S.Set Fence)
+    fencesFromInt i (x, fs) = (x', fs')
+      where
+        (p, x') = x `divMod` (10^i)
+        fs' = if p > 0
+              then S.insert (go1 p) fs
+              else fs
+
+    fences = snd $ foldr fencesFromInt (n, S.empty) [9, 11, 13, 15]
+
+    go1 :: Int -> Fence
+    go1 1 = F01
+    go1 2 = F12
+    go1 3 = F34
+    go1 4 = F45
+    go1 5 = F67
+    go1 6 = F78
+    go1 7 = F03
+    go1 8 = F14
+    go1 9 = F25
+    go1 10 = F36
+    go1 11 = F47
+    go1 _ = F58
+
+    figuresFromInt :: Int -> (Int, I.IntMap Figure) -> (Int, I.IntMap Figure)
+    figuresFromInt i (x, fs) = (x', fs')
+      where
+        (p, x') = x `divMod` (10^(8 - i))
+        fs' = if p > 0
+              then I.insert i (go2 p) fs
+              else fs
+
+    figures = snd $ foldr figuresFromInt (n `mod` (10^(9 :: Int)), I.empty) [8,7..0]
+
+    go2 :: Int -> Figure
+    go2 1 = Green
+    go2 2 = Hare
+    go2 3 = Purple
+    go2 4 = Red
+    go2 5 = Blue
+    go2 _ = Yellow
+
+-- | Calcule le hash d'un puzzle.
+fromPuzzle :: Puzzle -> Hash
+fromPuzzle x = H (fencesAsInt + figuresAsInt)
+  where
+    fenceToInt :: (Int, Fence) -> Int
+    fenceToInt (i, f) = (go1 f) * 10^i
+
+    fencesAsInt = sum $ fmap fenceToInt $ zip  [15, 13, 11, 9] (S.toAscList (fences_ x))
+
+    go1 :: Fence -> Int
+    go1 F01 = 1
+    go1 F12 = 2
+    go1 F34 = 3
+    go1 F45 = 4
+    go1 F67 = 5
+    go1 F78 = 6
+    go1 F03 = 7
+    go1 F14 = 8
+    go1 F25 = 9
+    go1 F36 = 10
+    go1 F47 = 11
+    go1 F58 = 12
+
+    figureToInt :: (Int, Figure) -> Int
+    figureToInt (i, f) = (go2 f) * 10^(8 - i)
+
+    figuresAsInt = sum $ fmap figureToInt (I.assocs $ figures_ x)
+
+    go2 :: Figure -> Int
+    go2 Green = 1
+    go2 Hare = 2
+    go2 Purple = 3
+    go2 Red = 4
+    go2 Blue = 5
+    go2 Yellow = 6
 
 -- | Vérifie si le puzzle est résolu.
 check :: Puzzle -> Bool

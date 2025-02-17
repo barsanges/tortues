@@ -20,15 +20,16 @@ test :: Puzzle -> Bool
 test x = isNothing (test' [x] S.empty)
 
 -- | Utilitaire de `test`.
-test' :: [Puzzle] -> S.Set Puzzle -> Maybe (S.Set Puzzle)
+test' :: [Puzzle] -> S.Set Hash -> Maybe (S.Set Hash)
 test' [] s = Just s
 test' (x:xs) s
   | check x = Nothing
   | otherwise = ms' >>= (test' xs)
   where
-    ms' = if x `S.member` s
+    h = fromPuzzle x
+    ms' = if h `S.member` s
           then Just s
-          else test' (move x) (S.insert x s)
+          else test' (move x) (S.insert h s)
 
 -- | Trouve une solution optimale (si elle existe) au puzzle. S'il
 -- existe plusieurs solutions optimales, aucune garantie n'est faite

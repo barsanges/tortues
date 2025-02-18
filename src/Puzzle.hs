@@ -44,7 +44,7 @@ data Puzzle = Puzzle { figures_ :: I.IntMap Figure
   deriving (Eq, Ord, Show)
 
 -- | L'identifiant unique d'un puzzle.
-data Hash = H Int
+data Hash = H {-# UNPACK #-} !Int
   deriving (Eq, Ord, Show)
 
 -- | Mouvements autorisés pour les tortues pour chaque case du plateau, en
@@ -171,10 +171,11 @@ toPuzzle (H n) = unsafeMkPuzzle figures fences
 fromPuzzle :: Puzzle -> Hash
 fromPuzzle x = H (fencesAsInt + figuresAsInt)
   where
-    fenceToInt :: (Int, Fence) -> Int
-    fenceToInt (i, f) = (go1 f) * 10^i
+    fenceToInt :: Int -> (Int, [Fence]) -> (Int, [Fence])
+    fenceToInt _ (n, []) = (n, [])
+    fenceToInt i (n, f:fs) = (n + (go1 f) * 10^i, fs)
 
-    fencesAsInt = sum $ fmap fenceToInt $ zip  [15, 13, 11, 9] (S.toAscList (fences_ x))
+    fencesAsInt = fst $ foldr fenceToInt (0, S.toList (fences_ x)) [15, 13, 11, 9]
 
     go1 :: Fence -> Int
     go1 F01 = 1
@@ -190,10 +191,10 @@ fromPuzzle x = H (fencesAsInt + figuresAsInt)
     go1 F47 = 11
     go1 F58 = 12
 
-    figureToInt :: (Int, Figure) -> Int
-    figureToInt (i, f) = (go2 f) * 10^(8 - i)
+    figureToInt :: (Int, Figure) -> Int -> Int
+    figureToInt (i, f) n = n + (go2 f) * 10^(8 - i)
 
-    figuresAsInt = sum $ fmap figureToInt (I.assocs $ figures_ x)
+    figuresAsInt = foldr figureToInt 0 (I.assocs $ figures_ x)
 
     go2 :: Figure -> Int
     go2 Green = 1

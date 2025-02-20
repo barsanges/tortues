@@ -10,6 +10,7 @@ module Puzzle
   , Fence(..)
   , Puzzle
   , mkPuzzle
+  , mkSolvedPuzzle
   , Hash
   , fromPuzzle
   , toPuzzle
@@ -19,7 +20,7 @@ module Puzzle
 
 import qualified Data.IntMap as I
 import Data.List ( nub )
-import Data.Maybe ( mapMaybe )
+import Data.Maybe ( catMaybes, mapMaybe )
 import qualified Data.Set as S
 import qualified Data.Vector as V
 
@@ -120,6 +121,25 @@ mkPuzzle fs fences = do
   if (S.size fences) > 4
     then Left "there should be at most 4 fences"
     else Right $ unsafeMkPuzzle fs' fences
+
+-- | Construit un puzzle résolu.
+mkSolvedPuzzle :: S.Set Figure
+               -> Maybe Fence
+               -> Maybe Fence
+               -> Maybe Fence
+               -> Maybe Fence
+               -> Puzzle
+mkSolvedPuzzle fs mf1 mf2 mf3 mf4 = unsafeMkPuzzle fs' fences
+  where
+    fs' = foldr (\ x dict -> I.insert (go x) x dict) I.empty fs
+    fences = (S.fromList . catMaybes) [mf1, mf2, mf3, mf4]
+    go :: Figure -> Int
+    go Green = 0
+    go Hare = 1
+    go Purple = 2
+    go Red = 6
+    go Blue = 7
+    go Yellow = 8
 
 -- | Transforme un hash en puzzle.
 toPuzzle :: Hash -> Puzzle

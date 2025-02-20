@@ -38,6 +38,22 @@ spec = do
     it "should give a result otherwise, even if the grid is empty" $
       (mkPuzzle I.empty (S.fromList [F01, F36])) `shouldSatisfy` isRight
 
+  describe "mkSolvedPuzzle" $ do
+    it "should always return a completed puzzle (1)" $ do
+      (Right $ mkSolvedPuzzle S.empty (Just F78) (Just F14) (Just F45) (Just F36)) `shouldBe` (mkPuzzle I.empty (S.fromList [F14, F36, F45, F78]))
+
+    it "should always return a completed puzzle (2)" $ do
+      (Right $ mkSolvedPuzzle (S.fromList [Green, Red]) (Just F01) Nothing (Just F03) Nothing) `shouldBe` (mkPuzzle (I.fromList [(0, Green), (6, Red)]) (S.fromList [F01, F03]))
+
+    it "should always return a completed puzzle (3)" $ do
+      (Right $ mkSolvedPuzzle (S.fromList [Green, Hare, Purple, Red, Blue, Yellow]) Nothing (Just F47) (Just F45) (Just F01)) `shouldBe` (mkPuzzle (I.fromList [(0, Green), (1, Hare), (2, Purple), (6, Red), (7, Blue), (8, Yellow)]) (S.fromList [F01, F45, F47]))
+
+    it "should always return a completed puzzle (4)" $ do
+      (check $ mkSolvedPuzzle (S.fromList [Blue, Hare, Purple]) Nothing Nothing Nothing Nothing) `shouldBe` True
+
+    it "should always return a completed puzzle (5)" $ do
+      (check $ mkSolvedPuzzle (S.fromList [Yellow, Hare, Green, Red]) (Just F14) (Just F25) (Just F36) (Just F47)) `shouldBe` True
+
   describe "Hash" $ do
     it "toPuzzle . fromPuzzle == id (1)" $
       (fmap (toPuzzle . fromPuzzle) $ mkPuzzle (I.fromList [(0, Hare)]) (S.fromList [F47, F03])) `shouldBe` (mkPuzzle (I.fromList [(0, Hare)]) (S.fromList [F47, F03]))

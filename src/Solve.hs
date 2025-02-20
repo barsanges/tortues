@@ -11,8 +11,10 @@ module Solve
   ) where
 
 import Data.Maybe ( isNothing )
+import qualified Data.Map as M
 import qualified Data.Set as S
-import Data.Sequence ( Seq(..) )
+import Data.Sequence ( Seq(..), (><) )
+import qualified Data.Sequence as Sq
 import Puzzle
 
 -- | Teste si un puzzle admet une solution.
@@ -35,26 +37,40 @@ test' (x:xs) s
 -- existe plusieurs solutions optimales, aucune garantie n'est faite
 -- sur la solution exacte renvoyée par la fonction.
 solve :: Puzzle -> Maybe (Seq Puzzle)
-solve x = fmap (fmap toPuzzle) $ solve' Empty x Nothing
+solve x = fmap (fmap toPuzzle) $ snd $ solve' Empty x (M.empty, Nothing)
 
 -- | Utilitaire de `solve`.
 solve' :: Seq Hash
        -> Puzzle
-       -> Maybe (Seq Hash)
-       -> Maybe (Seq Hash)
-solve' prev x mbest
-  | maybeLowerBy length mbest (Just prev) = mbest
-  | h `elem` prev = mbest
-  | check x = Just (prev :|> h)
-  | maybeLowerBy length mbest msol = mbest
-  | otherwise =  msol
+       -> (M.Map Hash (Maybe (Seq Hash)), Maybe (Seq Hash))
+       -> (M.Map Hash (Maybe (Seq Hash)), Maybe (Seq Hash))
+solve' prev x (known, mbest) = case h `M.lookup` known of
+  Just Nothing -> (known, mbest)
+  Just (Just next) | maybeLower mn (Just $ p + 1 + (length next)) -> (known, mbest)
+                   | otherwise -> (known, Just $ (prev :|> h) >< next)
+  Nothing | maybeLower mn (Just p) -> (known, mbest)
+          | h `elem` prev -> (known, mbest)
+          | check x -> (M.insert h (Just Sq.empty) known, Just (prev :|> h)) -- FIXME : c'est là qu'il faudrait introduire un test avec mbest, pas dessous !
+          | otherwise -> case mnew of
+                          Nothing -> (known', mbest)
+                          Just new | maybeLower mn (Just $ length new) -> (known', mbest)
+                                   | otherwise -> (go (Sq.tails new) $ M.insert h Nothing known', Just new)
   where
     h = fromPuzzle x
-    msol = foldr (solve' (prev :|> h)) mbest (move x)
+    mn = fmap length mbest
+    p = length prev
+    (known', mnew) = foldr (solve' (prev :|> h)) (known, mbest) (move x)
 
--- | Compare deux éléments incertains selon une métrique donnée.
-maybeLowerBy :: Ord b => (a -> b) -> Maybe a -> Maybe a -> Bool
-maybeLowerBy _ Nothing Nothing = True
-maybeLowerBy _ (Just _) Nothing = True
-maybeLowerBy _ Nothing (Just _) = False
-maybeLowerBy f (Just x) (Just y) = (f x) <= (f y)
+    go :: Seq (Seq Hash)
+       -> M.Map Hash (Maybe (Seq Hash))
+       -> M.Map Hash (Maybe (Seq Hash))
+    go Empty dict = dict
+    go (Empty :<| _) dict = dict
+    go ((u :<| us) :<| uss) dict = go uss (M.insert u (Just us) dict)
+
+-- | Compare deux éléments incertains.
+maybeLower :: Ord a => Maybe a -> Maybe a -> Bool
+maybeLower Nothing Nothing = True
+maybeLower (Just _) Nothing = True
+maybeLower Nothing (Just _) = False
+maybeLower (Just x) (Just y) = x <= y

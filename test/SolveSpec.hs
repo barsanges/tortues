@@ -61,3 +61,6 @@ spec = do
 
     it "should return a solution in 8 moves for the 1st puzzle in the rules" $
       (fmap (fmap length) $ fmap solve $ mkPuzzle (I.fromList [(6, Blue), (7, Red)]) (S.fromList [F14, F34, F58, F78])) `shouldBe` (Right $ Just 9)
+
+    it "should return a solution in 26 moves for the 2nd puzzle in the rules"$
+      (fmap (fmap length) $ fmap solve $ mkPuzzle (I.fromList [(7, Yellow), (8, Blue)]) (S.fromList [F14, F45, F47, F67])) `shouldBe` (Right $ Just 27)

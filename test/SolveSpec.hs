@@ -15,6 +15,14 @@ import Test.Hspec
 import Puzzle
 import Solve
 
+seqHead :: Sq.Seq a -> Maybe a
+seqHead Sq.Empty = Nothing
+seqHead (x Sq.:<| _) = Just x
+
+seqTail :: Sq.Seq a -> Maybe a
+seqTail Sq.Empty = Nothing
+seqTail (_ Sq.:|> x) = Just x
+
 spec :: Spec
 spec = do
   describe "test" $ do
@@ -59,8 +67,26 @@ spec = do
     it "should return an optimal solution (3)" $
       (fmap (fmap length) $ fmap solve $ mkPuzzle (I.fromList [(4, Green)]) (S.fromList [])) `shouldBe` (Right $ Just 3)
 
+    it "should return an optimal solution (4)" $
+      (fmap solve $ mkPuzzle (I.fromList [(2, Hare), (1, Purple)]) (S.fromList [F03, F14, F25])) `shouldBe` (Right $ Just $ Sq.fromList $ rights [mkPuzzle (I.fromList [(2, Hare), (1, Purple)]) (S.fromList [F03, F14, F25]),
+                                                                                                                                                  mkPuzzle (I.fromList [(0, Hare), (1, Purple)]) (S.fromList [F03, F14, F25]),
+                                                                                                                                                  mkPuzzle (I.fromList [(0, Hare), (2, Purple)]) (S.fromList [F03, F14, F25]),
+                                                                                                                                                  mkPuzzle (I.fromList [(1, Hare), (2, Purple)]) (S.fromList [F03, F14, F25])])
+
     it "should return a solution in 8 moves for the 1st puzzle in the rules" $
       (fmap (fmap length) $ fmap solve $ mkPuzzle (I.fromList [(6, Blue), (7, Red)]) (S.fromList [F14, F34, F58, F78])) `shouldBe` (Right $ Just 9)
 
     it "should return a solution in 26 moves for the 2nd puzzle in the rules"$
       (fmap (fmap length) $ fmap solve $ mkPuzzle (I.fromList [(7, Yellow), (8, Blue)]) (S.fromList [F14, F45, F47, F67])) `shouldBe` (Right $ Just 27)
+
+    it "the starting point should the first element of the solution (1)"$
+      (fmap ((=<<) seqHead) $ fmap solve $ mkPuzzle (I.fromList [(6, Blue), (7, Red)]) (S.fromList [F14, F34, F58, F78])) `shouldBe` (fmap Just $ mkPuzzle (I.fromList [(6, Blue), (7, Red)]) (S.fromList [F14, F34, F58, F78]))
+
+    it "the starting point should the first element of the solution (2)"$
+      (fmap ((=<<) seqHead) $ fmap solve $ mkPuzzle (I.fromList [(7, Yellow), (8, Blue)]) (S.fromList [F14, F45, F47, F67])) `shouldBe` (fmap Just $ mkPuzzle (I.fromList [(7, Yellow), (8, Blue)]) (S.fromList [F14, F45, F47, F67]))
+
+    it "the solved puzzle should be the last element of the solution (1)"$
+      (fmap ((=<<) seqTail) $ fmap solve $ mkPuzzle (I.fromList [(6, Blue), (7, Red)]) (S.fromList [F14, F34, F58, F78])) `shouldBe` (fmap Just $ mkPuzzle (I.fromList [(7, Blue), (6, Red)]) (S.fromList [F14, F34, F58, F78]))
+
+    it "the solved puzzle should be the last element of the solution (2)"$
+      (fmap ((=<<) seqTail) $ fmap solve $ mkPuzzle (I.fromList [(7, Yellow), (8, Blue)]) (S.fromList [F14, F45, F47, F67])) `shouldBe` (fmap Just $ mkPuzzle (I.fromList [(8, Yellow), (7, Blue)]) (S.fromList [F14, F45, F47, F67]))

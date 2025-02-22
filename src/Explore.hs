@@ -18,8 +18,8 @@ import Puzzle
 -- L'entier associé à chaque configuration indique le nombre minimum de
 -- coups nécessaires pour atteindre cette configuration depuis la
 -- configuration de départ.
-explore :: Puzzle -> M.Map Hash Int
-explore = depth . successors
+explore :: (Int -> Puzzle -> Bool) -> Puzzle -> M.Map Hash Int
+explore criterion = depth . (successors criterion)
 
 -- | Indique la "profondeur" à laquelle se trouve chaque élément dans la
 -- liste initiale.
@@ -32,13 +32,15 @@ depth = snd . (foldl' go (0, M.empty))
         dict' = foldr (\ x d -> M.insert x n d) dict xs
 
 -- | Renvoie toutes les configurations atteignables depuis une grille.
-successors :: Puzzle -> [S.Set Hash]
-successors x0 = drill S.empty ((S.singleton . fromPuzzle) x0, [x0])
+successors :: (Int -> Puzzle -> Bool) -> Puzzle -> [S.Set Hash]
+successors criterion x0 = drill 0 S.empty ((S.singleton . fromPuzzle) x0, [x0])
   where
 
-    drill :: S.Set Hash -> (S.Set Hash, [Puzzle]) -> [S.Set Hash]
-    drill _ (hs, []) = [hs]
-    drill prev (hs, xs) = (hs:(drill new (gs, ys)))
+    drill :: Int -> S.Set Hash -> (S.Set Hash, [Puzzle]) -> [S.Set Hash]
+    drill _ _ (hs, []) = [hs]
+    drill n prev (hs, xs)
+      | any (criterion n) xs = [hs]
+      | otherwise = (hs:(drill (n+1) new (gs, ys)))
       where
         new = S.union prev hs
         (gs, ys) = filterHash $ concatMap move xs

@@ -47,6 +47,7 @@ spec = do
       (explore (\ i _ -> i == 2) $ mkSolvedPuzzle (S.fromList [Hare, Purple]) (Just F03) (Just F14) (Just F25) Nothing) `shouldBe` (M.fromList $ [ (fromPuzzle $ unsafeFromRight $ mkPuzzle (I.fromList [(1, Hare), (2, Purple)]) (S.fromList [F03, F14, F25]), 0)
                                                                                                                                                  , (fromPuzzle $ unsafeFromRight $ mkPuzzle (I.fromList [(0, Hare), (2, Purple)]) (S.fromList [F03, F14, F25]), 1)
                                                                                                                                                  , (fromPuzzle $ unsafeFromRight $ mkPuzzle (I.fromList [(0, Hare), (1, Purple)]) (S.fromList [F03, F14, F25]), 2)])
+
     it "should stop when a certain condition is met (1)" $
       (explore (\ _ x -> check x) $ mkSolvedPuzzle (S.fromList [Hare, Purple]) (Just F03) (Just F14) (Just F25) Nothing) `shouldBe` (M.fromList $ [(fromPuzzle $ mkSolvedPuzzle (S.fromList [Hare, Purple]) (Just F03) (Just F14) (Just F25) Nothing, 0)])
 

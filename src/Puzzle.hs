@@ -11,6 +11,7 @@ module Puzzle
   , Puzzle
   , mkPuzzle
   , mkSolvedPuzzle
+  , convertToSolved
   , Hash
   , fromPuzzle
   , toPuzzle
@@ -140,6 +141,19 @@ mkSolvedPuzzle fs mf1 mf2 mf3 mf4 = unsafeMkPuzzle fs' fences
     go Red = 6
     go Blue = 7
     go Yellow = 8
+
+-- | Renvoie le puzzle résolu correspondant au puzzle fourni.
+convertToSolved :: Puzzle -> Puzzle
+convertToSolved x = x { figures_ = figs }
+  where
+    figs = (I.fromList . (fmap go) . (I.elems . figures_)) x
+    go :: Figure -> (Int, Figure)
+    go Green = (0, Green)
+    go Hare = (1, Hare)
+    go Purple = (2, Purple)
+    go Red = (6, Red)
+    go Blue = (7, Blue)
+    go Yellow = (8, Yellow)
 
 -- | Transforme un hash en puzzle.
 toPuzzle :: Hash -> Puzzle

@@ -54,6 +54,13 @@ spec = do
     it "should always return a completed puzzle (5)" $ do
       (check $ mkSolvedPuzzle (S.fromList [Yellow, Hare, Green, Red]) (Just F14) (Just F25) (Just F36) (Just F47)) `shouldBe` True
 
+  describe "convertToSolved" $ do
+    it "should always return a completed puzzle (1)" $ do
+      (fmap convertToSolved $ mkPuzzle (I.fromList [(2, Red), (6, Purple)]) (S.fromList [])) `shouldBe` (Right $ mkSolvedPuzzle (S.fromList [Purple, Red]) Nothing Nothing Nothing Nothing)
+
+    it "should always return a completed puzzle (2)" $ do
+      (fmap convertToSolved $ mkPuzzle (I.fromList [(6, Red), (7, Blue), (8, Yellow)]) (S.fromList [F47, F58])) `shouldBe` (Right $ mkSolvedPuzzle (S.fromList [Red, Blue, Yellow]) (Just F47) (Just F58) Nothing Nothing)
+
   describe "Hash" $ do
     it "toPuzzle . fromPuzzle == id (1)" $
       (fmap (toPuzzle . fromPuzzle) $ mkPuzzle (I.fromList [(0, Hare)]) (S.fromList [F47, F03])) `shouldBe` (mkPuzzle (I.fromList [(0, Hare)]) (S.fromList [F47, F03]))

@@ -61,15 +61,15 @@ spec = do
     it "should always return a completed puzzle (2)" $ do
       (fmap convertToSolved $ mkPuzzle (I.fromList [(6, Red), (7, Blue), (8, Yellow)]) (S.fromList [F47, F58])) `shouldBe` (Right $ mkSolvedPuzzle (S.fromList [Red, Blue, Yellow]) (Just F47) (Just F58) Nothing Nothing)
 
-  describe "Hash" $ do
-    it "toPuzzle . fromPuzzle == id (1)" $
-      (fmap (toPuzzle . fromPuzzle) $ mkPuzzle (I.fromList [(0, Hare)]) (S.fromList [F47, F03])) `shouldBe` (mkPuzzle (I.fromList [(0, Hare)]) (S.fromList [F47, F03]))
+  describe "Puzzle" $ do
+    it "a puzzle should be equal to itself (1)" $
+      (mkPuzzle (I.fromList [(0, Hare)]) (S.fromList [F47, F03])) `shouldBe` (mkPuzzle (I.fromList [(0, Hare)]) (S.fromList [F47, F03]))
 
-    it "toPuzzle . fromPuzzle == id (2)" $
-      (fmap (toPuzzle . fromPuzzle) $ mkPuzzle I.empty (S.fromList [F01, F36])) `shouldBe` (mkPuzzle I.empty (S.fromList [F01, F36]))
+    it "a puzzle should be equal to itself  (2)" $
+      (mkPuzzle I.empty (S.fromList [F01, F36])) `shouldBe` (mkPuzzle I.empty (S.fromList [F01, F36]))
 
     it "should give different identifiers to different puzzles" $
-      (fmap fromPuzzle $ mkPuzzle (I.fromList [(0, Hare)]) (S.fromList [F01, F03])) `shouldNotBe` (fmap fromPuzzle $ mkPuzzle (I.fromList [(0, Green)]) (S.fromList [F01, F03]))
+      (mkPuzzle (I.fromList [(0, Hare)]) (S.fromList [F01, F03])) `shouldNotBe` (mkPuzzle (I.fromList [(0, Green)]) (S.fromList [F01, F03]))
 
   describe "check" $ do
     it "should return True if the puzzle is solved (1)" $

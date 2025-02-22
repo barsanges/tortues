@@ -17,6 +17,7 @@ extra-source-files:
 
 library
   exposed-modules:
+      Explore
       Puzzle
       Solve
   other-modules:
@@ -33,6 +34,7 @@ test-suite tortues-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      ExploreSpec
       PuzzleSpec
       SolveSpec
       Paths_tortues

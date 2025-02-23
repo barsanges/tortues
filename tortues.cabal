@@ -27,6 +27,7 @@ library
   build-depends:
       base
     , containers
+    , search-algorithms
     , vector
   default-language: Haskell2010
 
@@ -44,6 +45,7 @@ test-suite tortues-test
       base
     , containers
     , hspec
+    , search-algorithms
     , tortues
     , vector
   default-language: Haskell2010

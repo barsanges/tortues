@@ -8,14 +8,17 @@ Résout un puzzle du jeu "Le lièvre et les tortues".
 module Solve
   ( test
   , solve
+  , solve'
   ) where
 
+import Algorithm.Search ( dijkstra )
 import Data.Maybe ( isNothing )
 import qualified Data.Map as M
 import qualified Data.Set as S
-import Data.Sequence ( Seq(..), (><) )
+import Data.Sequence ( Seq(..) )
 import qualified Data.Sequence as Sq
 import Puzzle
+import Explore
 
 -- | Teste si un puzzle admet une solution.
 test :: Puzzle -> Bool
@@ -36,39 +39,25 @@ test' (x:xs) s
 -- existe plusieurs solutions optimales, aucune garantie n'est faite
 -- sur la solution exacte renvoyée par la fonction.
 solve :: Puzzle -> Maybe (Seq Puzzle)
-solve x = snd $ solve' Empty x (M.empty, Nothing)
-
--- | Utilitaire de `solve`.
-solve' :: Seq Puzzle
-       -> Puzzle
-       -> (M.Map Puzzle (Maybe (Seq Puzzle)), Maybe (Seq Puzzle))
-       -> (M.Map Puzzle (Maybe (Seq Puzzle)), Maybe (Seq Puzzle))
-solve' prev x (known, mbest) = case x `M.lookup` known of
-  Just Nothing -> (known, mbest)
-  Just (Just next) | maybeLower mn (Just $ p + 1 + (length next)) -> (known, mbest)
-                   | otherwise -> (known, Just $ (prev :|> x) >< next)
-  Nothing | maybeLower mn (Just p) -> (known, mbest)
-          | x `elem` prev -> (known, mbest)
-          | check x -> (M.insert x (Just Sq.empty) known, Just (prev :|> x)) -- FIXME : c'est là qu'il faudrait introduire un test avec mbest, pas dessous !
-          | otherwise -> case mnew of
-                          Nothing -> (known', mbest)
-                          Just new | maybeLower mn (Just $ length new) -> (known', mbest)
-                                   | otherwise -> (go (Sq.tails new) $ M.insert x Nothing known', Just new)
+solve x0 = case M.lookup x0 dict of
+             Nothing -> Nothing
+             Just n -> go n [x0]
   where
-    mn = fmap length mbest
-    p = length prev
-    (known', mnew) = foldr (solve' (prev :|> x)) (known, mbest) (move x)
+    solved = convertToSolved x0
+    dict = explore (\ _ y -> y == x0) solved
 
-    go :: Seq (Seq Puzzle)
-       -> M.Map Puzzle (Maybe (Seq Puzzle))
-       -> M.Map Puzzle (Maybe (Seq Puzzle))
-    go Empty dict = dict
-    go (Empty :<| _) dict = dict
-    go ((u :<| us) :<| uss) dict = go uss (M.insert u (Just us) dict)
+    go :: Int -> [Puzzle] -> Maybe (Seq Puzzle)
+    go _ [] = Nothing
+    go n (y:ys) = case M.lookup y dict of
+      Nothing -> go n ys
+      Just p | y == solved -> Just (Sq.singleton solved)
+             | p == n -> fmap ((:<|) y) (go (n-1) (move y))
+             | otherwise -> go n ys
 
--- | Compare deux éléments incertains.
-maybeLower :: Ord a => Maybe a -> Maybe a -> Bool
-maybeLower Nothing Nothing = True
-maybeLower (Just _) Nothing = True
-maybeLower Nothing (Just _) = False
-maybeLower (Just x) (Just y) = x <= y
+-- | Une implémentation alternative de `solve` - peut-être un peu
+-- moins rapide, mais plus maligne parce qu'elle réemploie une
+-- librairie existante.
+solve' :: Puzzle -> Maybe (Seq Puzzle)
+solve' x = fmap (Sq.fromList . ((:) x) . snd) res
+  where
+    res = dijkstra move (\ _ _ -> 1 :: Int) check x

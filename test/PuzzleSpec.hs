@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 {- |
    Module      : PuzzleSpec
    Copyright   : Copyright (C) 2025 barsanges
@@ -7,6 +8,7 @@ Teste le module `Puzzle`.
 
 module PuzzleSpec ( spec ) where
 
+import Data.Aeson ( encode )
 import Data.Either ( isRight, rights )
 import qualified Data.IntMap as I
 import qualified Data.Set as S
@@ -114,3 +116,24 @@ spec = do
       (move $ unsafeFromRight $ mkPuzzle (I.fromList [(3, Hare)]) (S.fromList [F45])) `shouldMatchList ` (rights [mkPuzzle (I.fromList [(0, Hare)]) (S.fromList [F45]),
                                                                                                                   mkPuzzle (I.fromList [(4, Hare)]) (S.fromList [F45]),
                                                                                                                   mkPuzzle (I.fromList [(6, Hare)]) (S.fromList [F45])])
+
+  describe "Puzzle" $ do
+    it "can be serialized to JSON (1)" $
+      (encode $ mkSolvedPuzzle S.empty (Just F78) (Just F14) (Just F45) (Just F36)) `shouldBe` "{\"fences\":[[4,5],[7,8],[1,4],[3,6]]}"
+
+    it "can be serialized to JSON (2)" $ do
+      (encode $ mkSolvedPuzzle (S.fromList [Green, Red]) (Just F01) Nothing (Just F03) Nothing) `shouldBe` "{\"green\":0,\"red\":6,\"fences\":[[0,1],[0,3]]}"
+
+    it "can be serialized to JSON (3)" $ do
+      (fmap encode $ mkPuzzle (I.fromList [(6, Blue), (7, Red)]) (S.fromList [F14, F34, F58, F78])) `shouldBe` (Right "{\"blue\":6,\"red\":7,\"fences\":[[3,4],[7,8],[1,4],[5,8]]}")
+
+    it "can be serialized to JSON (4)" $ do
+      (fmap encode $ mkPuzzle (I.fromList [(7, Yellow), (8, Blue)]) (S.fromList [F14, F45, F47, F67])) `shouldBe` (Right "{\"yellow\":7,\"blue\":8,\"fences\":[[4,5],[6,7],[1,4],[4,7]]}")
+
+    it "can be serialized to JSON (5)" $ do
+      (encode $ [ mkSolvedPuzzle (S.fromList [Green, Hare, Purple, Red, Blue, Yellow]) Nothing (Just F47) (Just F45) (Just F01)
+                , mkSolvedPuzzle (S.fromList [Blue, Hare, Purple]) Nothing Nothing Nothing Nothing ]) `shouldBe` "[{\"green\":0,\"hare\":1,\"purple\":2,\"red\":6,\"blue\":7,\"yellow\":8,\"fences\":[[0,1],[4,5],[4,7]]},{\"hare\":1,\"purple\":2,\"blue\":7,\"fences\":[]}]"
+
+    it "can be serialized to JSON (6)" $ do
+      (encode $ rights [ mkPuzzle (I.fromList [(7, Yellow), (8, Blue)]) (S.fromList [F14, F45, F47, F67])
+                       , mkPuzzle (I.fromList [(3, Purple), (4, Hare), (5, Blue), (6, Yellow), (7, Green), (8, Red)]) (S.fromList [F34, F45, F36, F78]) ]) `shouldBe` "[{\"yellow\":7,\"blue\":8,\"fences\":[[4,5],[6,7],[1,4],[4,7]]},{\"purple\":3,\"hare\":4,\"blue\":5,\"yellow\":6,\"green\":7,\"red\":8,\"fences\":[[3,4],[4,5],[7,8],[3,6]]}]"

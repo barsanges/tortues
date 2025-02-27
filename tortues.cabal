@@ -25,7 +25,8 @@ library
   hs-source-dirs:
       src
   build-depends:
-      base
+      aeson
+    , base
     , containers
     , search-algorithms
     , vector
@@ -42,7 +43,8 @@ test-suite tortues-test
   hs-source-dirs:
       test
   build-depends:
-      base
+      aeson
+    , base
     , containers
     , hspec
     , search-algorithms

@@ -11,6 +11,7 @@ synopsis:            A solver for the game "Le lièvre et les tortues"
 description:         Please see the README
 
 dependencies:
+- aeson
 - base
 - containers
 - search-algorithms

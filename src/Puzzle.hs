@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 {- |
    Module      : Puzzle
    Copyright   : Copyright (C) 2025 barsanges
@@ -16,6 +17,7 @@ module Puzzle
   , move
   ) where
 
+import Data.Aeson
 import qualified Data.IntMap as I
 import Data.List ( nub )
 import Data.Maybe ( catMaybes, mapMaybe )
@@ -33,6 +35,22 @@ data Figure = Green | Hare | Purple | Red | Blue | Yellow
 data Fence = F01 | F12 | F34 | F45 | F67 | F78
            | F03 | F14 | F25 | F36 | F47 | F58
   deriving (Eq, Ord, Show)
+
+instance ToJSON Fence where
+  toJSON = error "toJSON is not implemented for 'Fence'"
+
+  toEncoding F01 = toEncoding ([0, 1] :: [Int])
+  toEncoding F12 = toEncoding ([1, 2] :: [Int])
+  toEncoding F34 = toEncoding ([3, 4] :: [Int])
+  toEncoding F45 = toEncoding ([4, 5] :: [Int])
+  toEncoding F67 = toEncoding ([6, 7] :: [Int])
+  toEncoding F78 = toEncoding ([7, 8] :: [Int])
+  toEncoding F03 = toEncoding ([0, 3] :: [Int])
+  toEncoding F14 = toEncoding ([1, 4] :: [Int])
+  toEncoding F25 = toEncoding ([2, 5] :: [Int])
+  toEncoding F36 = toEncoding ([3, 6] :: [Int])
+  toEncoding F47 = toEncoding ([4, 7] :: [Int])
+  toEncoding F58 = toEncoding ([5, 8] :: [Int])
 
 -- | L'identifiant unique d'un puzzle.
 data Hash = H {-# UNPACK #-} !Int
@@ -52,6 +70,20 @@ instance Eq Puzzle where
 
 instance Ord Puzzle where
   compare x y = compare (hash_ x) (hash_ y)
+
+instance ToJSON Puzzle where
+  toJSON = error "toJSON is not implemented for 'Puzzle'"
+
+  toEncoding x = pairs ( fs <> "fences" .= (S.toList . fences_) x )
+    where
+      fs = I.foldlWithKey' go mempty (figures_ x)
+      go :: Series -> Int -> Figure -> Series
+      go y n Green = y <> "green" .= n
+      go y n Hare = y <> "hare" .= n
+      go y n Purple = y <> "purple" .= n
+      go y n Red = y <> "red" .= n
+      go y n Blue = y <> "blue" .= n
+      go y n Yellow = y <> "yellow" .= n
 
 -- | Mouvements autorisés pour les tortues pour chaque case du plateau, en
 -- l'absence de barrières.

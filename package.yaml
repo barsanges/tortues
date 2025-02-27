@@ -13,12 +13,22 @@ description:         Please see the README
 dependencies:
 - aeson
 - base
+- bytestring
 - containers
 - search-algorithms
 - vector
 
 library:
   source-dirs: src
+
+executables:
+  tortues:
+    source-dirs:     app
+    main:            Main.hs
+    dependencies:
+    - combinatorial
+    - optparse-applicative
+    - tortues
 
 tests:
   tortues-test:

@@ -117,23 +117,23 @@ spec = do
                                                                                                                   mkPuzzle (I.fromList [(4, Hare)]) (S.fromList [F45]),
                                                                                                                   mkPuzzle (I.fromList [(6, Hare)]) (S.fromList [F45])])
 
-  describe "Puzzle" $ do
+  describe "Rated" $ do
     it "can be serialized to JSON (1)" $
-      (encode $ mkSolvedPuzzle S.empty (Just F78) (Just F14) (Just F45) (Just F36)) `shouldBe` "{\"fences\":[[4,5],[7,8],[1,4],[3,6]]}"
+      (encode $ Rated 0 $ mkSolvedPuzzle S.empty (Just F78) (Just F14) (Just F45) (Just F36)) `shouldBe` "{\"score\":0,\"figures\":{},\"fences\":[[4,5],[7,8],[1,4],[3,6]]}"
 
     it "can be serialized to JSON (2)" $ do
-      (encode $ mkSolvedPuzzle (S.fromList [Green, Red]) (Just F01) Nothing (Just F03) Nothing) `shouldBe` "{\"green\":0,\"red\":6,\"fences\":[[0,1],[0,3]]}"
+      (encode $ Rated 0 $ mkSolvedPuzzle (S.fromList [Green, Red]) (Just F01) Nothing (Just F03) Nothing) `shouldBe` "{\"score\":0,\"figures\":{\"green\":0,\"red\":6},\"fences\":[[0,1],[0,3]]}"
 
     it "can be serialized to JSON (3)" $ do
-      (fmap encode $ mkPuzzle (I.fromList [(6, Blue), (7, Red)]) (S.fromList [F14, F34, F58, F78])) `shouldBe` (Right "{\"blue\":6,\"red\":7,\"fences\":[[3,4],[7,8],[1,4],[5,8]]}")
+      (fmap encode $ fmap (Rated 8) $ mkPuzzle (I.fromList [(6, Blue), (7, Red)]) (S.fromList [F14, F34, F58, F78])) `shouldBe` (Right "{\"score\":8,\"figures\":{\"blue\":6,\"red\":7},\"fences\":[[3,4],[7,8],[1,4],[5,8]]}")
 
     it "can be serialized to JSON (4)" $ do
-      (fmap encode $ mkPuzzle (I.fromList [(7, Yellow), (8, Blue)]) (S.fromList [F14, F45, F47, F67])) `shouldBe` (Right "{\"yellow\":7,\"blue\":8,\"fences\":[[4,5],[6,7],[1,4],[4,7]]}")
+      (fmap encode $ fmap (Rated 99) $ mkPuzzle (I.fromList [(7, Yellow), (8, Blue)]) (S.fromList [F14, F45, F47, F67])) `shouldBe` (Right "{\"score\":99,\"figures\":{\"blue\":8,\"yellow\":7},\"fences\":[[4,5],[6,7],[1,4],[4,7]]}")
 
     it "can be serialized to JSON (5)" $ do
-      (encode $ [ mkSolvedPuzzle (S.fromList [Green, Hare, Purple, Red, Blue, Yellow]) Nothing (Just F47) (Just F45) (Just F01)
-                , mkSolvedPuzzle (S.fromList [Blue, Hare, Purple]) Nothing Nothing Nothing Nothing ]) `shouldBe` "[{\"green\":0,\"hare\":1,\"purple\":2,\"red\":6,\"blue\":7,\"yellow\":8,\"fences\":[[0,1],[4,5],[4,7]]},{\"hare\":1,\"purple\":2,\"blue\":7,\"fences\":[]}]"
+      (encode $ [ Rated 2 $ mkSolvedPuzzle (S.fromList [Green, Hare, Purple, Red, Blue, Yellow]) Nothing (Just F47) (Just F45) (Just F01)
+                , Rated 3 $ mkSolvedPuzzle (S.fromList [Blue, Hare, Purple]) Nothing Nothing Nothing Nothing ]) `shouldBe` "[{\"score\":2,\"figures\":{\"blue\":7,\"green\":0,\"hare\":1,\"purple\":2,\"red\":6,\"yellow\":8},\"fences\":[[0,1],[4,5],[4,7]]},{\"score\":3,\"figures\":{\"blue\":7,\"hare\":1,\"purple\":2},\"fences\":[]}]"
 
     it "can be serialized to JSON (6)" $ do
-      (encode $ rights [ mkPuzzle (I.fromList [(7, Yellow), (8, Blue)]) (S.fromList [F14, F45, F47, F67])
-                       , mkPuzzle (I.fromList [(3, Purple), (4, Hare), (5, Blue), (6, Yellow), (7, Green), (8, Red)]) (S.fromList [F34, F45, F36, F78]) ]) `shouldBe` "[{\"yellow\":7,\"blue\":8,\"fences\":[[4,5],[6,7],[1,4],[4,7]]},{\"purple\":3,\"hare\":4,\"blue\":5,\"yellow\":6,\"green\":7,\"red\":8,\"fences\":[[3,4],[4,5],[7,8],[3,6]]}]"
+      (encode $ rights [ fmap (Rated 8) $ mkPuzzle (I.fromList [(7, Yellow), (8, Blue)]) (S.fromList [F14, F45, F47, F67])
+                       , fmap (Rated 17) $ mkPuzzle (I.fromList [(3, Purple), (4, Hare), (5, Blue), (6, Yellow), (7, Green), (8, Red)]) (S.fromList [F34, F45, F36, F78]) ]) `shouldBe` "[{\"score\":8,\"figures\":{\"blue\":8,\"yellow\":7},\"fences\":[[4,5],[6,7],[1,4],[4,7]]},{\"score\":17,\"figures\":{\"blue\":5,\"green\":7,\"hare\":4,\"purple\":3,\"red\":8,\"yellow\":6},\"fences\":[[3,4],[4,5],[7,8],[3,6]]}]"

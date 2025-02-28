@@ -10,6 +10,7 @@ module Puzzle
   ( Figure(..)
   , Fence(..)
   , Puzzle
+  , Rated(..)
   , mkPuzzle
   , mkSolvedPuzzle
   , convertToSolved
@@ -20,6 +21,7 @@ module Puzzle
 import Data.Aeson
 import qualified Data.IntMap as I
 import Data.List ( nub )
+import qualified Data.Map as M
 import Data.Maybe ( catMaybes, mapMaybe )
 import qualified Data.Set as S
 import qualified Data.Vector as V
@@ -71,19 +73,25 @@ instance Eq Puzzle where
 instance Ord Puzzle where
   compare x y = compare (hash_ x) (hash_ y)
 
-instance ToJSON Puzzle where
-  toJSON = error "toJSON is not implemented for 'Puzzle'"
+-- | Un puzzle et un score.
+data Rated = Rated Int Puzzle
 
-  toEncoding x = pairs ( fs <> "fences" .= (S.toList . fences_) x )
+instance ToJSON Rated where
+  toJSON = error "toJSON is not implemented for 'Rated'"
+
+  toEncoding (Rated n p) = pairs ( "score" .= n
+                                   <> "figures" .= fs
+                                   <> "fences" .= (S.toList . fences_) p
+                                 )
     where
-      fs = I.foldlWithKey' go mempty (figures_ x)
-      go :: Series -> Int -> Figure -> Series
-      go y n Green = y <> "green" .= n
-      go y n Hare = y <> "hare" .= n
-      go y n Purple = y <> "purple" .= n
-      go y n Red = y <> "red" .= n
-      go y n Blue = y <> "blue" .= n
-      go y n Yellow = y <> "yellow" .= n
+      fs = I.foldlWithKey' go M.empty (figures_ p)
+      go :: M.Map String Int -> Int -> Figure -> M.Map String Int
+      go d i Green = M.insert "green" i d
+      go d i Hare = M.insert "hare" i d
+      go d i Purple = M.insert "purple" i d
+      go d i Red = M.insert "red" i d
+      go d i Blue = M.insert "blue" i d
+      go d i Yellow = M.insert "yellow" i d
 
 -- | Mouvements autorisés pour les tortues pour chaque case du plateau, en
 -- l'absence de barrières.

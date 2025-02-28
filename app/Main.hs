@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
 {- |
    Module      : Main
    Copyright   : Copyright (C) 2025 barsanges
@@ -35,14 +34,6 @@ args = info (outputParser <**> helper)
        ( fullDesc
          <> header "tortues"
          <> progDesc "Generate solvable puzzles for 'tortues'" )
-
--- | Un puzzle et le nombre de coups minimal qu'il faut pour le résoudre.
-data Rated = Rated Int Puzzle
-
-instance ToJSON Rated where
-  toJSON = error "toJSON is not implemented for 'Rated'"
-
-  toEncoding (Rated n p) = pairs ( "nmoves" .= n <> "puzzle" .= p )
 
 -- | Renvoie la liste des ancêtres d'un puzzle, avec leurs notes.
 ancestors :: Puzzle -> [Rated]

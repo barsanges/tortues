@@ -11,7 +11,7 @@ module Main where
 import Combinatorics ( tuples )
 import Data.Aeson
 import qualified Data.ByteString.Lazy as BS
-import qualified Data.Map as M
+import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 import Options.Applicative
 import Explore

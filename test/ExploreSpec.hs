@@ -8,7 +8,7 @@ Teste le module `Explore`.
 module ExploreSpec ( spec ) where
 
 import qualified Data.IntMap as I
-import qualified Data.Map as M
+import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 import Test.Hspec
 import Puzzle

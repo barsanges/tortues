@@ -13,7 +13,7 @@ module Solve
 
 import Algorithm.Search ( dijkstra )
 import Data.Maybe ( isNothing )
-import qualified Data.Map as M
+import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 import Data.Sequence ( Seq(..) )
 import qualified Data.Sequence as Sq

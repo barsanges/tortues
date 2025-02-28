@@ -12,10 +12,10 @@ import Enumerate
 
 spec :: Spec
 spec = do
-  describe "allPossibleFigures" $ do
+  describe "figuresConfigurations" $ do
     it "should contain 57 elements" $
-      (length allPossibleFigures) `shouldBe` (15 + 20 + 15 + 6 + 1)
+      (length figuresConfigurations) `shouldBe` (15 + 20 + 15 + 6 + 1)
 
-  describe "allPossibleFences" $ do
+  describe "fencesConfigurations" $ do
     it "should contain 715 elements" $
-      (length allPossibleFences) `shouldBe` (220 + 495)
+      (length fencesConfigurations) `shouldBe` (220 + 495)

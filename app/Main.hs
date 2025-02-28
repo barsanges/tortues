@@ -53,8 +53,8 @@ main :: IO ()
 main = do
   output <- execParser args
   let solved = [ mkSolvedPuzzle s mf1 mf2 mf3 mf4
-               | s <- allPossibleFigures
-               , (mf1, mf2, mf3, mf4) <- allPossibleFences
+               | s <- figuresConfigurations
+               , (mf1, mf2, mf3, mf4) <- fencesConfigurations
                ]
   let solvable = concatMap ancestors solved
   case output of

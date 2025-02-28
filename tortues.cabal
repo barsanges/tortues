@@ -17,6 +17,7 @@ extra-source-files:
 
 library
   exposed-modules:
+      Enumerate
       Explore
       Puzzle
       Solve
@@ -28,6 +29,7 @@ library
       aeson
     , base
     , bytestring
+    , combinatorial
     , containers
     , search-algorithms
     , vector
@@ -55,6 +57,7 @@ test-suite tortues-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      EnumerateSpec
       ExploreSpec
       PuzzleSpec
       SolveSpec
@@ -65,6 +68,7 @@ test-suite tortues-test
       aeson
     , base
     , bytestring
+    , combinatorial
     , containers
     , hspec
     , search-algorithms

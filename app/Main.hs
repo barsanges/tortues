@@ -9,6 +9,7 @@ module Main where
 
 import Data.Aeson
 import qualified Data.ByteString.Lazy as BS
+import Data.Foldable ( maximumBy )
 import qualified Data.Map.Strict as M
 import Options.Applicative
 import Enumerate
@@ -35,9 +36,9 @@ args = info (outputParser <**> helper)
          <> header "tortues"
          <> progDesc "Generate solvable puzzles for 'tortues'" )
 
--- | Renvoie la liste des ancêtres d'un puzzle, avec leurs notes.
-ancestors :: Puzzle -> [Rated]
-ancestors = (fmap (\ (p, n) -> Rated n p)) . M.assocs . (explore (\ _ _ -> False))
+-- | Renvoie l'ancêtre le plus lointain d'un puzzle, avec sa note.
+furthest :: Puzzle -> Rated
+furthest = (\ (p, n) -> Rated n p) . (maximumBy (\ (p, _) (q, _) -> compare p q)) . M.assocs . (explore (\ _ _ -> False))
 
 -- | Point d'entrée du programme.
 main :: IO ()
@@ -47,7 +48,7 @@ main = do
                | s <- figuresConfigurations
                , (mf1, mf2, mf3, mf4) <- fencesConfigurations
                ]
-  let solvable = concatMap ancestors solved
+  let solvable = fmap furthest solved
   case output of
     OutputFile f -> encodeFile f solvable
     StdOut -> (BS.putStr . encode) solvable

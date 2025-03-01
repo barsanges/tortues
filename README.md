@@ -13,5 +13,5 @@ standard. Ces résultats peuvent par exemple être manipulés avec
 * `tortues | jq 'map( select( .figures | has( "hare" ) ) )'` pour ne
   retenir que les puzzles qui font appel au lièvre ;
 * `tortues | jq 'map( select( (.figures | has( "hare" ) | not ) and
-  .score > 39 ) )` sélectionne les puzzles qui n'utilisent pas le
+  .score > 39 ) )'` sélectionne les puzzles qui n'utilisent pas le
   lièvre et se terminent en 40 coups ou plus.

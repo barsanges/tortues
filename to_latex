@@ -1,0 +1,98 @@
+#!/usr/bin/python3
+
+import argparse
+import json
+import sys
+
+def place_fence(i, j):
+   "Renvoie une ligne TikZ qui dessine une barrière entre les cases `i` et `j`."
+   if j == i+1:
+      res = f"\draw[line width=2] ($(x{i})!0.5!(x{j}) + (0, -0.5)$) -- ($(x{i})!0.5!(x{j}) + (0, 0.5)$);"
+   else:
+      res = f"\draw[line width=2] ($(x{i})!0.5!(x{j}) + (-0.5, 0)$) -- ($(x{i})!0.5!(x{j}) + (0.5, 0)$);"
+   return res
+
+def place_figure(animal, i):
+   "Renvoie une ligne TikZ qui dessine `animal` dans la case `i`."
+   if animal == "hare":
+      color = "orange"
+   elif animal == "green":
+      color = "ForestGreen"
+   elif animal == "purple":
+      color = "violet"
+   elif animal == "yellow":
+      color = "Goldenrod"
+   else:
+      color = animal
+   res = f"\draw[draw={color},fill={color}] (x{i}) circle [radius=0.3];"
+   return res
+
+def to_tikz(data, n):
+   """
+   Transforme en figure TikZ la description JSON d'une grille du jeu
+   du lièvre et des tortues.
+   """
+   fences = [place_fence(*x) for x in data["fences"]]
+   figures = [place_figure(x, i) for x, i in data["figures"].items()]
+   res = r"""\begin{tikzpicture}[scale=1.5]
+  \coordinate (x0) at (0,0);
+  \coordinate (x1) at (1,0);
+  \coordinate (x2) at (2,0);
+  \coordinate (x3) at (0,-1);
+  \coordinate (x4) at (1,-1);
+  \coordinate (x5) at (2,-1);
+
+  \coordinate (x6) at (0,-2);
+  \coordinate (x7) at (1,-2);
+  \coordinate (x8) at (2,-2);
+
+  \draw ($(x0) + (-0.5, 0.5)$) rectangle ($(x8) + (0.5, -0.5)$);
+
+  \draw ($(x0) + (0.5, 0.5)$) -- ($(x6) + (0.5, -0.5)$);
+  \draw ($(x1) + (0.5, 0.5)$) -- ($(x7) + (0.5, -0.5)$);
+
+  \draw ($(x0) + (-0.5, -0.5)$) -- ($(x2) + (0.5, -0.5)$);
+  \draw ($(x3) + (-0.5, -0.5)$) -- ($(x5) + (0.5, -0.5)$);
+
+  % Zones d'arrivée :
+  \draw[line width=2,draw=ForestGreen] ($(x0) + (-0.5, 0.5)$) -- ($(x0) + (0.5, 0.5)$);
+  \draw[line width=2,draw=orange] ($(x1) + (-0.5, 0.5)$) -- ($(x1) + (0.5, 0.5)$);
+  \draw[line width=2,draw=violet] ($(x2) + (-0.5, 0.5)$) -- ($(x2) + (0.5, 0.5)$);
+  \draw[line width=2,draw=red] ($(x6) + (-0.5, -0.5)$) -- ($(x6) + (0.5, -0.5)$);
+  \draw[line width=2,draw=blue] ($(x7) + (-0.5, -0.5)$) -- ($(x7) + (0.5, -0.5)$);
+  \draw[line width=2,draw=Goldenrod] ($(x8) + (-0.5, -0.5)$) -- ($(x8) + (0.5, -0.5)$);
+
+  % Barrières :
+  #1
+
+  % Animaux :
+  #2
+
+  \node[align=center,above] (title) at ($(x1) + (0, 0.5)$) {\textbf{n°#3} ($\rightarrow$ #4) \textbf{:}};
+\end{tikzpicture}"""
+   res = res.replace("#1", "\n".join(fences))
+   res = res.replace("#2", "\n".join(figures))
+   res = res.replace("#3", str(n))
+   res = res.replace("#4", str(data["score"]))
+   return res
+
+if __name__ == "__main__":
+   PARSER = argparse.ArgumentParser(description="turn the JSON representation"\
+                                    " of puzzles into a LaTeX/TikZ one")
+   PARSER.add_argument('-f', '--input', help="read the file 'INPUT' instead "\
+                       "of reading the stdin")
+   PARSER.add_argument('-o', '--output', help="write the result to the file "\
+                       "'OUTPUT' instead of sending it to stdout")
+   ARGS = PARSER.parse_args()
+   if ARGS.input is None:
+      INITIAL = json.loads(sys.stdin.read())
+   else:
+      with open(ARGS.input, 'r') as FIN:
+         INITIAL = json.loads(FIN.read())
+   RESULT = [to_tikz(X, N+1) for (N, X) in enumerate(INITIAL)]
+   OUTPUT = "\n\quad".join(RESULT)
+   if ARGS.output is None:
+      print(OUTPUT)
+   else:
+      with open(ARGS.output, 'w') as FOUT:
+         FOUT.write(OUTPUT)

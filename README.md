@@ -1,6 +1,7 @@
 # Le lièvre et les tortues
 
-Un solveur pour le jeu du lièvre et des tortues.
+Un solveur pour le jeu du lièvre et des tortues. Le temps d'exécution
+est de l'ordre de quelques minutes.
 
 `tortues` produit des résultats en JSON, par défaut sur la sortie
 standard. Ces résultats peuvent par exemple être manipulés avec

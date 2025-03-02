@@ -56,23 +56,22 @@ nubSymmetric = (fmap og) . (nubBy isSymmetric) . (fmap go)
 isSymmetric :: [Fence] -> [Fence] -> Bool
 isSymmetric [] [] = True
 isSymmetric [] _ = False
-isSymmetric (x:xs) ys = case mx' of
-  Just x' | x' `elem` ys -> True && (isSymmetric xs (delete x' ys))
-          | otherwise -> False
-  Nothing -> False
+isSymmetric (x:xs) ys | x' `elem` ys = True && (isSymmetric xs (delete x' ys))
+                      | otherwise = False
   where
-    mx' = symmetric x
+    x' = symmetric x
 
 -- | Donne la barrière symétrique d'une barrière donnée.
-symmetric :: Fence -> Maybe Fence
-symmetric F01 = Just F12
-symmetric F12 = Just F01
-symmetric F34 = Just F45
-symmetric F45 = Just F34
-symmetric F67 = Just F78
-symmetric F78 = Just F67
-symmetric F03 = Just F25
-symmetric F25 = Just F03
-symmetric F36 = Just F58
-symmetric F58 = Just F36
-symmetric _ = Nothing
+symmetric :: Fence -> Fence
+symmetric F01 = F12
+symmetric F12 = F01
+symmetric F34 = F45
+symmetric F45 = F34
+symmetric F67 = F78
+symmetric F78 = F67
+symmetric F03 = F25
+symmetric F25 = F03
+symmetric F36 = F58
+symmetric F58 = F36
+symmetric F14 = F14
+symmetric F47 = F47

@@ -45,3 +45,7 @@ spec = do
                                                                            (Just F58, Nothing, Nothing, Nothing),
                                                                            (Just F47, Just F58, Just F36, Nothing),
                                                                            (Just F14, Just F25, Just F03, Nothing)]
+
+    it "should handle correctly the two fences in the middle column" $
+      (nubSymmetric [(Just F01, Just F14, Just F47, Just F78),
+                     (Just F12, Just F14, Just F47, Just F67)]) `shouldBe` [(Just F01, Just F14, Just F47, Just F78)]

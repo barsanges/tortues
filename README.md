@@ -15,7 +15,10 @@ standard. Ces résultats peuvent par exemple être manipulés avec
   retenir que les puzzles qui font appel au lièvre ;
 * `tortues | jq 'map( select( (.figures | has( "hare" ) | not ) and
   .score > 39 ) )'` sélectionne les puzzles qui n'utilisent pas le
-  lièvre et se terminent en 40 coups ou plus.
+  lièvre et se terminent en 40 coups ou plus ;
+* `tortues | jq 'map( select( (.figures | has( "hare" ) | not ) and
+  .score > 39 ) ) | sort_by( .score )'` sélectionne les mêmes et les
+  trie par nombre de coups.
 
 `to_latex` peut être utilisé pour passer les puzzles d'un format JSON
 à une représentation TikZ pouvant être insérée dans un document LaTeX.
